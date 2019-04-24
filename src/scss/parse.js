@@ -1959,6 +1959,35 @@ function checkIdent(i) {
 
   return i - start;
 }
+function checkVariableName(i) {
+  const start = i;
+
+  if (i >= tokensLength) return 0;
+
+  while (i < tokensLength && tokens[i].type === TokenType.HyphenMinus) {
+    i++;
+  }
+
+  if (checkInterpolation(i)) {
+    tokens[start].ident_last = i - 1;
+    return i - start;
+  }
+
+  if (tokens[i].type === TokenType.LowLine ||
+      tokens[i].type === TokenType.Identifier) i++;
+  else return 0;
+
+  for (; i < tokensLength; i++) {
+    if (tokens[i].type !== TokenType.HyphenMinus &&
+        tokens[i].type !== TokenType.LowLine &&
+        tokens[i].type !== TokenType.Identifier &&
+        tokens[i].type !== TokenType.DecimalNumber) break;
+  }
+
+  tokens[start].ident_last = i - 1;
+
+  return i - start;
+}
 
 /**
  * Get node with an identifier
@@ -5099,7 +5128,7 @@ function checkVariable(i) {
   if (tokens[i].type === TokenType.DollarSign) i++;
   else return 0;
 
-  if (l = checkIdent(i)) i += l;
+  if (l = checkVariableName(i)) i += l;
   else return 0;
 
   return i - start;
